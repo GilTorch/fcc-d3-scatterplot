@@ -1,0 +1,27 @@
+#tooltip{
+    /* width: 50px;
+    height: 50px; */
+    background-color: white;
+    position: absolute;
+    top: 50%; 
+    left: 50%; 
+    transform: translate(-50%,-50%);
+    border: 1px solid black;
+    padding: 0.5%;
+    border-radius: 1rem;
+    color: black;
+    z-index: 1000; 
+    opacity: 1;
+    font-size: 1rem
+}
+#tooltip-title{
+    display: inline-block;
+}
+.label{
+    display: inline-block;
+}
+
+.label{
+    color: #555;
+    font-weight: bold;
+}

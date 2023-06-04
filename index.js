@@ -1,3 +1,9 @@
+let globalMousePos = { x: undefined, y: undefined}
+window.addEventListener('mousemove', (event) => {
+    globalMousePos = { x: event.clientX, y: event.clientY };
+  });
+  
+
 
 const { select, json, scaleTime, scaleBand, extent, axisLeft, axisBottom } = d3;
 
@@ -44,10 +50,15 @@ const yScale = scaleBand()
     
 const marks = data.map(dataPoint => ({
     cx: xScale(new Date(dataPoint.Year,1,1)),
+    dataPoint,
     cy: yScale(dataPoint.Time),
     fill: dataPoint.Doping !=="" ? 'rgba(0,0,255,0.5)' : 'orange',
     r: 10
 }))
+
+const tooltip = select('#tooltip')
+tooltip.style('opacity',0)
+
 
 svg 
   .selectAll('circle')
@@ -59,6 +70,23 @@ svg
   .attr('fill',d => d.fill)
   .attr('stroke-width', 1)
   .attr('stroke', 'black')
+  .on('mouseover', (_,d) => {
+    const { Year, Time, Doping, Name, Nationality} = d.dataPoint
+    const text = `
+        ${Name}
+       Nationality: ${Nationality} </br>
+       Time: ${Time}
+       Year: ${Year} </br>
+        ${Doping? 'Doping:'+Doping :''}
+    `
+    tooltip.style('left', margin.left + globalMousePos.x+100+'px')
+    tooltip.style('top',  globalMousePos.y-45+'px')
+    tooltip.style('opacity',1)
+    tooltip.html(text)
+  })
+  .on('mouseout', () => {
+    tooltip.style('opacity',0)
+  })
 
 svg.append('g')
    .attr('transform',`translate(${margin.left},0)`)
