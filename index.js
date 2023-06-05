@@ -3,8 +3,6 @@ window.addEventListener('mousemove', (event) => {
     globalMousePos = { x: event.clientX, y: event.clientY };
   });
   
-
-
 const { select, json, scaleTime, scaleBand, extent, axisLeft, axisBottom } = d3;
 
 const width = window.innerWidth*0.7; 
@@ -30,7 +28,7 @@ const main = async () => {
    const data =  await json(URL)
    
    console.table(data)
-  const svg = select('body')
+  const svg = select('.scatterplot')
     .append('svg')
     .attr('width',width - margin.right - margin.left)
     .attr('height',height - margin.bottom - margin.top)
@@ -47,12 +45,16 @@ const main = async () => {
 const yScale = scaleBand()
     .domain(data.map(yValue))
     .range([height - margin.bottom, margin.top])
+
+
+const usedDopingColor = 'rgba(0,0,255,0.5)' 
+const noDopingColor = 'orange'
     
 const marks = data.map(dataPoint => ({
     cx: xScale(new Date(dataPoint.Year,1,1)),
     dataPoint,
     cy: yScale(dataPoint.Time),
-    fill: dataPoint.Doping !=="" ? 'rgba(0,0,255,0.5)' : 'orange',
+    fill: dataPoint.Doping !== '' ? usedDopingColor : noDopingColor,
     r: 10
 }))
 
@@ -70,7 +72,8 @@ svg
   .attr('fill',d => d.fill)
   .attr('stroke-width', 1)
   .attr('stroke', 'black')
-  .on('mouseover', (_,d) => {
+  .on('mouseover', (e,d) => {
+    console.log(e)
     const { Year, Time, Doping, Name, Nationality} = d.dataPoint
     const text = `
         ${Name}
@@ -81,7 +84,9 @@ svg
     `
     tooltip.style('left', margin.left + globalMousePos.x+100+'px')
     tooltip.style('top',  globalMousePos.y-45+'px')
+    
     tooltip.style('opacity',1)
+
     tooltip.html(text)
   })
   .on('mouseout', () => {
@@ -95,7 +100,44 @@ svg.append('g')
 svg.append('g')
    .attr('transform',`translate(0,${height - margin.bottom})`)
    .call(axisBottom(xScale).tickSizeOuter(0))
- 
+
+const legendData = [
+    {
+        text: "No doping allegations", 
+        color: noDopingColor,
+        x: width - margin.right,
+        y: (height - margin.bottom)/2,
+        width: 50
+    },
+    {
+        text: "Riders with doping allegations", 
+        color: usedDopingColor,
+        x: width - margin.right,
+        y: (height - margin.bottom)/2 + 60,
+        width: 50
+    }
+]
+
+svg
+  .selectAll('g.legend')
+  .data(legendData)
+  .join('g')
+  .append('rect')
+  .attr('width', d => d.width)
+  .attr('height', d => d.width)
+  .attr('fill', d => d.color)
+  .attr('x',d => d.x)
+  .attr('y',d => d.y)
+
+svg 
+  .selectAll('text.label')
+  .data(legendData)
+  .join('text')
+  .text(d => d.text)
+  .attr('x', d => d.x - 10)
+  .attr('y', d => d.y + 25)
+  .attr('text-anchor', 'end')
+
 
 }
 

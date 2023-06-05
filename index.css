@@ -1,3 +1,17 @@
+.scatterplot{
+    background-color: rgba(255,255,255,0.5);
+    padding: 1%;
+    position: absolute; 
+    width: 70%;
+    height: 70%;
+    left: 50%; 
+    top: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: -9px 2px 45px 1px rgba(0,0,0,0.79);
+    -webkit-box-shadow: -9px 2px 45px 1px rgba(0,0,0,0.79);
+    -moz-box-shadow: -9px 2px 45px 1px rgba(0,0,0,0.79);
+}
+
 #tooltip{
     /* width: 50px;
     height: 50px; */
@@ -17,6 +31,16 @@
 #tooltip-title{
     display: inline-block;
 }
+
+#title{
+    text-align: center;
+}
+
+#subtitle{
+    text-align: center;
+}
+
+
 .label{
     display: inline-block;
 }
