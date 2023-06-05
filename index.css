@@ -45,6 +45,10 @@
     display: inline-block;
 }
 
+.y-axis-label{
+    font-size: 22px;
+}
+
 .label{
     color: #555;
     font-weight: bold;

@@ -74,7 +74,7 @@ svg
   .attr('stroke', 'black')
   .on('mouseover', (e,d) => {
     console.log(e)
-    const { Year, Time, Doping, Name, Nationality} = d.dataPoint
+    const { Year, Time, Doping, Name, Nationality } = d.dataPoint
     const text = `
         ${Name}
        Nationality: ${Nationality} </br>
@@ -84,9 +84,7 @@ svg
     `
     tooltip.style('left', margin.left + globalMousePos.x+100+'px')
     tooltip.style('top',  globalMousePos.y-45+'px')
-    
     tooltip.style('opacity',1)
-
     tooltip.html(text)
   })
   .on('mouseout', () => {
@@ -95,11 +93,22 @@ svg
 
 svg.append('g')
    .attr('transform',`translate(${margin.left},0)`)
+   .attr('class', 'y-axis')
    .call(axisLeft(yScale).tickSizeOuter(0))
 
 svg.append('g')
    .attr('transform',`translate(0,${height - margin.bottom})`)
+   .attr('class', 'x-axis')
    .call(axisBottom(xScale).tickSizeOuter(0))
+
+svg 
+  .append('text')
+  .attr('x', -height/2)
+  .attr('y',0)
+  .attr('transform', 'rotate(-90)')
+  .attr('text-anchor','middle')
+  .attr('class','y-axis-label')
+  .text("Time in Minutes")
 
 const legendData = [
     {
