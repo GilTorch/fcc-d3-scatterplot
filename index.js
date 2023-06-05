@@ -61,17 +61,19 @@ const marks = data.map(dataPoint => ({
 const tooltip = select('#tooltip')
 tooltip.style('opacity',0)
 
-
 svg 
   .selectAll('circle')
   .data(marks)
   .join('circle')
   .attr('cx', d => d.cx)
   .attr('cy', d => d.cy)
+  .attr('data-xvalue', d => d.cx)
+  .attr('data-yvalue', d => d.cy)
   .attr('r', d => d.r)
   .attr('fill',d => d.fill)
   .attr('stroke-width', 1)
   .attr('stroke', 'black')
+  
   .on('mouseover', (e,d) => {
     console.log(e)
     const { Year, Time, Doping, Name, Nationality } = d.dataPoint
@@ -91,6 +93,7 @@ svg
     tooltip.style('opacity',0)
   })
 
+// axis creation
 svg.append('g')
    .attr('transform',`translate(${margin.left},0)`)
    .attr('class', 'y-axis')
@@ -101,6 +104,7 @@ svg.append('g')
    .attr('class', 'x-axis')
    .call(axisBottom(xScale).tickSizeOuter(0))
 
+// y-axis -label
 svg 
   .append('text')
   .attr('x', -height/2)
@@ -116,19 +120,19 @@ const legendData = [
         color: noDopingColor,
         x: width,
         y: (height - margin.bottom)/2,
-        width: 50
+        width: 25
     },
     {
         text: "Riders with doping allegations", 
         color: usedDopingColor,
         x: width,
         y: (height - margin.bottom)/2 + 60,
-        width: 50
+        width: 25
     }
 ]
 
 svg
-  .selectAll('g.legend')
+  .selectAll('g.legend-label')
   .data(legendData)
   .join('g')
   .append('rect')
@@ -144,8 +148,9 @@ svg
   .join('text')
   .text(d => d.text)
   .attr('x', d => d.x - 10)
-  .attr('y', d => d.y + 25)
+  .attr('y', d => d.y + 12.5)
   .attr('text-anchor', 'end')
+  .attr('id','label')
 
 
 }
