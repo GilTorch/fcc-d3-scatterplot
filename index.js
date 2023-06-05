@@ -114,14 +114,14 @@ const legendData = [
     {
         text: "No doping allegations", 
         color: noDopingColor,
-        x: width - margin.right,
+        x: width,
         y: (height - margin.bottom)/2,
         width: 50
     },
     {
         text: "Riders with doping allegations", 
         color: usedDopingColor,
-        x: width - margin.right,
+        x: width,
         y: (height - margin.bottom)/2 + 60,
         width: 50
     }
