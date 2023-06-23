@@ -3,7 +3,7 @@ window.addEventListener('mousemove', (event) => {
     globalMousePos = { x: event.clientX, y: event.clientY };
   });
   
-const { select, json, scaleTime, scaleBand, extent, axisLeft, axisBottom } = d3;
+const { select, timeParse, json, scaleTime, scaleBand, extent, axisLeft, axisBottom } = d3;
 
 const width = window.innerWidth*0.7; 
 const height = window.innerHeight*0.7; 
@@ -27,56 +27,67 @@ const URL = [
 const main = async () => {
    const data =  await json(URL)
    
-   console.table(data)
   const svg = select('.scatterplot')
     .append('svg')
     .attr('width',width - margin.right - margin.left)
     .attr('height',height - margin.bottom - margin.top)
     .attr('viewBox',[0, 0, width, height])
 
- const yValue = d => d.Time
 
- const xScaleExtent = extent(data, d => new Date(d.Year, 1,1));
+ const convertTimeToDate = time => {
+  const date = new Date(1970, 0,1,0,time.split(":")[0], time.split(":")[1])
+  return date; 
+}
 
- const xScale = scaleTime()
-    .domain(xScaleExtent)
+const xExtent = [
+  d3.min(data, d => new Date(d.Year-1, 1,1)),
+  d3.max(data, d => new Date(d.Year+1, 1,1)),
+]
+
+let yExtent = [
+  d3.min(data, d => convertTimeToDate(d.Time)),
+  d3.max(data, d => convertTimeToDate(d.Time))
+]
+
+const xScale = scaleTime()
+    .domain(xExtent)
     .range([margin.left, width - margin.right])
 
-const yScale = scaleBand()
-    .domain(data.map(yValue))
-    .range([height - margin.bottom, margin.top])
-
+const yScale = scaleTime()
+    .domain(yExtent)
+    .range([margin.top,height - margin.bottom,])
 
 const usedDopingColor = 'rgba(0,0,255,0.5)' 
 const noDopingColor = 'orange'
     
-const marks = data.map(dataPoint => ({
-    cx: xScale(new Date(dataPoint.Year,1,1)),
-    dataPoint,
-    cy: yScale(dataPoint.Time),
-    fill: dataPoint.Doping !== '' ? usedDopingColor : noDopingColor,
+const dots = data.map(datapoint => ({
+    cx: xScale(new Date(datapoint.Year,1,1)),
+    datapoint,
+    cy: yScale(convertTimeToDate(datapoint.Time)),
+    fill: datapoint.Doping !== '' ? usedDopingColor : noDopingColor,
     r: 10
 }))
 
 const tooltip = select('#tooltip')
 tooltip.style('opacity',0)
 
+
 svg 
   .selectAll('circle')
-  .data(marks)
+  .data(dots)
   .join('circle')
+  .attr('class', 'dot')
   .attr('cx', d => d.cx)
   .attr('cy', d => d.cy)
-  .attr('data-xvalue', d => d.cx)
-  .attr('data-yvalue', d => d.cy)
+  .attr('data-xvalue', d => d.datapoint.Year)
+  .attr('data-yvalue', d => convertTimeToDate(d.datapoint.Time))
   .attr('r', d => d.r)
   .attr('fill',d => d.fill)
   .attr('stroke-width', 1)
   .attr('stroke', 'black')
-  
+  .attr('class','dot')
   .on('mouseover', (e,d) => {
-    console.log(e)
-    const { Year, Time, Doping, Name, Nationality } = d.dataPoint
+    const { Year, Time, Doping, Name, Nationality } = d.datapoint
     const text = `
         ${Name}
        Nationality: ${Nationality} </br>
@@ -88,6 +99,7 @@ svg
     tooltip.style('top',  globalMousePos.y-45+'px')
     tooltip.style('opacity',1)
     tooltip.html(text)
+    tooltip.attr('data-year', Year)
   })
   .on('mouseout', () => {
     tooltip.style('opacity',0)
@@ -96,12 +108,17 @@ svg
 // axis creation
 svg.append('g')
    .attr('transform',`translate(${margin.left},0)`)
-   .attr('class', 'y-axis')
-   .call(axisLeft(yScale).tickSizeOuter(0))
+   .attr('id', 'y-axis')
+   .call(axisLeft(yScale)
+   .tickFormat(d => {
+    let appendZero = val => val < 10 ? `0${val}` : val
+    return appendZero(d.getMinutes()) + ':' + appendZero(d.getSeconds());
+   })
+   .tickSizeOuter(0))
 
 svg.append('g')
    .attr('transform',`translate(0,${height - margin.bottom})`)
-   .attr('class', 'x-axis')
+   .attr('id', 'x-axis')
    .call(axisBottom(xScale).tickSizeOuter(0))
 
 // y-axis -label
@@ -139,6 +156,7 @@ svg
   .attr('width', d => d.width)
   .attr('height', d => d.width)
   .attr('fill', d => d.color)
+  .attr('id', 'legend')
   .attr('x',d => d.x)
   .attr('y',d => d.y)
 
